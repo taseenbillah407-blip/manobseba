@@ -1,22 +1,32 @@
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+"use client";
 
-export default async function DashboardPage() {
-  const supabase = await createClient();
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+export default function DashboardPage() {
+  const supabase = createClient();
 
-  if (!user) {
-    redirect("/login");
-  }
+  const [email, setEmail] = useState("");
+
+  useEffect(() => {
+    async function getUser() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user) {
+        setEmail(user.email ?? "");
+      }
+    }
+
+    getUser();
+  }, [supabase]);
 
   return (
     <main>
       <h1>মানব সেবা ফাউন্ডেশন Dashboard</h1>
-      <p>আপনি সফলভাবে লগইন করেছেন।</p>
-      <p>{user.email}</p>
+      <p>লগইন সফল হয়েছে।</p>
+      <p>{email}</p>
     </main>
   );
 }
